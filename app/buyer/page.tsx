@@ -1,33 +1,50 @@
 "use client"
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Camera, X } from 'lucide-react'
-import { QrReader } from 'react-qr-reader'
+import dynamic from 'next/dynamic'
+
+// Dynamically import Html5QrcodeScanner with no SSR
+const Html5QrcodeScanner = dynamic(
+  () => import('html5-qrcode').then(mod => mod.Html5QrcodeScanner),
+  { ssr: false }
+);
 
 export default function BuyerPage() {
   const [nftCode, setNftCode] = useState('')
   const [showScanner, setShowScanner] = useState(false)
   const router = useRouter()
 
+  useEffect(() => {
+    if (showScanner && typeof window !== 'undefined') {
+      const scanner = new Html5QrcodeScanner("reader", {
+        qrbox: {
+          width: 250,
+          height: 250,
+        },
+        fps: 5,
+      }, false);
+
+      scanner.render((decodedText) => {
+        setNftCode(decodedText);
+        setShowScanner(false);
+        scanner.clear();
+      }, (error) => {
+        console.warn(error);
+      });
+
+      return () => {
+        scanner.clear().catch(console.error);
+      };
+    }
+  }, [showScanner]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real application, we would validate the NFT code
     router.push(`/product/nike-air-jordan-1`)
-  }
-
-  const handleScan = (result: any) => {
-    if (result) {
-      setNftCode(result?.text)
-      setShowScanner(false)
-    }
-  }
-
-  const handleError = (error: any) => {
-    console.error(error)
-    alert("Error accessing camera: " + error.message)
   }
 
   return (
@@ -48,14 +65,7 @@ export default function BuyerPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div className="relative aspect-square w-full">
-              <QrReader
-                constraints={{ facingMode: 'environment' }}
-                onResult={handleScan}
-                onError={handleError}
-                className="w-full"
-              />
-            </div>
+            <div id="reader" className="w-full"></div>
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
