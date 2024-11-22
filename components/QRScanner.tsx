@@ -24,9 +24,7 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
           width: 250,
           height: 250,
         },
-        videoConstraints: {
-          facingMode: { exact: "environment" }
-        }
+        facingMode: "environment",
       },
       false
     );
