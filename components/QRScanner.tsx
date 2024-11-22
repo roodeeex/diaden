@@ -2,8 +2,6 @@
 
 import { useEffect, useRef } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
-import { ImageIcon } from 'lucide-react'
-import { Button } from '@/components/ui/button'
 
 interface QRScannerProps {
   onScan: (decodedText: string) => void;
@@ -13,51 +11,23 @@ interface QRScannerProps {
 export function QRScanner({ onScan, onError }: QRScannerProps) {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
-  const handleFileUpload = () => {
-    const input = document.createElement('input');
-    input.type = 'file';
-    input.accept = 'image/*';
-    input.onchange = async (e) => {
-      const file = (e.target as HTMLInputElement).files?.[0];
-      if (file && scannerRef.current) {
-        try {
-          // Use FileReader to read the file
-          const reader = new FileReader();
-          reader.onload = async (e) => {
-            const imageUrl = e.target?.result as string;
-            // Process the image URL (you might want to send this to a server)
-            onScan(imageUrl);
-          };
-          reader.readAsDataURL(file);
-        } catch (error) {
-          onError(error as Error);
-        }
-      }
-    };
-    input.click();
-  };
-
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    scannerRef.current = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        experimentalFeatures: {
-          useBarCodeDetectorIfSupported: true
-        },
-        rememberLastUsedCamera: true,
-        supportedScanTypes: []
+    // Configure scanner with back camera preference
+    const config = {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250,
       },
-      false
-    );
+      aspectRatio: 1.0
+    };
 
-    scannerRef.current.render(
+    scannerRef.current = new Html5QrcodeScanner("reader", config, false);
+
+    const html5QrcodeScanner = scannerRef.current;
+    html5QrcodeScanner.render(
       (decodedText) => {
         onScan(decodedText);
         if (navigator.vibrate) {
@@ -69,9 +39,21 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       }
     );
 
+    // Request camera permission immediately
+    navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: { 
+          exact: "environment" 
+        } 
+      } 
+    }).catch(() => {
+      // Fallback to any available camera
+      return navigator.mediaDevices.getUserMedia({ video: true });
+    });
+
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(console.error);
       }
     };
   }, [onScan, onError]);
@@ -79,40 +61,20 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   return (
     <div className="qr-scanner-container">
       <div id="reader" className="w-full" />
-      <div className="flex justify-center mt-2">
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={handleFileUpload}
-          className="hover:bg-gray-100"
-        >
-          <ImageIcon className="h-4 w-4" />
-          <span className="sr-only">Upload from gallery</span>
-        </Button>
-      </div>
       <style jsx global>{`
-        /* Hide unnecessary UI elements */
         #reader__dashboard_section_csr,
         #reader__dashboard_section_swaplink,
         #reader__dashboard_section_fileselection,
-        #reader__camera_permission_button,
         #reader__camera_selection,
-        #reader__status_span,
-        #reader__scan_region_label,
-        select:has(option[value="environment"]),
-        #reader__dashboard_section_swaplink,
-        #html5-qrcode-button-camera-stop,
-        #html5-qrcode-button-camera-start {
+        #reader__status_span {
           display: none !important;
         }
 
-        /* Custom styling for the scanner */
         #reader {
           border: none !important;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
           border-radius: 8px;
           overflow: hidden;
-          width: 100% !important;
         }
 
         #reader__scan_region {
@@ -122,19 +84,6 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
         #reader__scan_region video {
           border-radius: 8px !important;
-        }
-
-        /* Hide the default file input button */
-        #reader__filescan_input {
-          display: none !important;
-        }
-
-        /* Custom container for the gallery button */
-        .qr-scanner-container {
-          position: relative;
-          width: 100%;
-          max-width: 400px;
-          margin: 0 auto;
         }
       `}</style>
     </div>
