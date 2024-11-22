@@ -24,29 +24,20 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
           width: 250,
           height: 250,
         },
-        aspectRatio: 1.0,
-        showTorchButtonIfSupported: true,
-        defaultZoomValueIfSupported: 2,
-        formatsToSupport: [ 0x1 ], // QR Code only
-        rememberLastUsedCamera: true,
-        supportedScanTypes: [],  // Disable file scanning
-        experimentalFeatures: {
-          useBarCodeDetectorIfSupported: true
-        },
-        cameraConfig: { 
-          facingMode: { exact: "environment" } // Force back camera
+        videoConstraints: {
+          facingMode: { exact: "environment" }
         }
       },
-      /* verbose= */ false
+      false
     );
 
     // Start scanning automatically
     scannerRef.current.render(
       (decodedText) => {
         onScan(decodedText);
-        // Play success sound
-        const audio = new Audio('/beep.mp3');
-        audio.play().catch(() => {});
+        if (navigator.vibrate) {
+          navigator.vibrate(200);
+        }
       },
       (errorMessage) => {
         onError(new Error(errorMessage));
