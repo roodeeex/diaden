@@ -22,7 +22,7 @@ export default function BrandLandingPage() {
           </div>
           <div className="lg:w-1/2">
             <Image
-              src="https://cdn.dribbble.com/users/7087400/screenshots/17815910/media/1bd10fbe33ad42ba52eaf891335e3415.png"
+              src="/img/brand-auth.png"
               alt="Brand Authentication Concept"
               width={600}
               height={400}

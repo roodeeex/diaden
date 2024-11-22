@@ -2,9 +2,7 @@
 const nextConfig = {
   transpilePackages: ['html5-qrcode'],
   images: {
-    domains: [
-      'cdn.dribbble.com',
-    ],
+    domains: ['cdn.dribbble.com'],
   },
 };
 

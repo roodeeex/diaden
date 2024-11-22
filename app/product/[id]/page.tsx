@@ -9,8 +9,8 @@ const productData = {
   seller: 'Nike',
   productionDate: '2023-03-01',
   nftId: 'NFT-AJ1-123456',
-  imageUrl: 'https://cdn.dribbble.com/users/7087400/screenshots/17815910/media/1bd10fbe33ad42ba52eaf891335e3415.png',
-  description: 'The Air Jordan 1, first released in 1985, is an iconic sneaker designed for Michael Jordan. This classic model features premium leather uppers, the Nike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
+  imageUrl: '/img/p1.png',
+  description: 'The Nike Air Jordan 1, first released in 1985. This classic model features premium leather uppers, the Mike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
 }
 
 export default function ProductPage() {
