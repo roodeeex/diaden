@@ -16,21 +16,32 @@ const QRScanner = dynamic(
 export default function BuyerPage() {
   const [nftCode, setNftCode] = useState('')
   const [showScanner, setShowScanner] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleScan = (decodedText: string) => {
     setNftCode(decodedText);
     setShowScanner(false);
+    if (navigator.vibrate) {
+      navigator.vibrate(200);
+    }
   };
 
   const handleError = (error: Error) => {
     console.warn(error);
+    if (error.message.includes('NotAllowedError')) {
+      alert('Please allow camera access to scan QR codes');
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     router.push(`/product/nike-air-jordan-1`)
   }
+
+  const handleCameraClick = () => {
+    setShowScanner(true);
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -50,7 +61,10 @@ export default function BuyerPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <QRScanner onScan={handleScan} onError={handleError} />
+            <QRScanner 
+              onScan={handleScan} 
+              onError={handleError}
+            />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +86,7 @@ export default function BuyerPage() {
                   type="button"
                   size="icon"
                   className="absolute top-[70%] right-2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors bg-transparent hover:bg-transparent"
-                  onClick={() => setShowScanner(true)}
+                  onClick={handleCameraClick}
                 >
                   <Camera className="h-4 w-4" />
                   <span className="sr-only">Scan QR code</span>
