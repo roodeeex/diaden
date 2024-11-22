@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from 'react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { Html5Qrcode } from 'html5-qrcode'
 import { Button } from "@/components/ui/button"
 import { ImageIcon } from "lucide-react"
 
@@ -11,42 +11,42 @@ interface QRScannerProps {
 }
 
 export function QRScanner({ onScan, onError }: QRScannerProps) {
-  const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const html5QrCode = useRef<Html5Qrcode | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Configure scanner with back camera preference
-    const config = {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250,
-      },
-      videoConstraints: {
-        facingMode: { exact: "environment" }
+    html5QrCode.current = new Html5Qrcode("reader");
+
+    const startScanning = async () => {
+      try {
+        await html5QrCode.current?.start(
+          { facingMode: "environment" },
+          {
+            fps: 10,
+            qrbox: { width: 250, height: 250 }
+          },
+          (decodedText) => {
+            onScan(decodedText);
+            if (navigator.vibrate) {
+              navigator.vibrate(200);
+            }
+          },
+          (errorMessage) => {
+            console.warn(errorMessage);
+          }
+        );
+      } catch (err) {
+        onError(err instanceof Error ? err : new Error('Failed to start scanner'));
       }
     };
 
-    scannerRef.current = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
-
-    // Start scanning
-    scannerRef.current.render(
-      (decodedText: string) => {
-        onScan(decodedText);
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
-        }
-      },
-      (errorMessage: string) => {
-        onError(new Error(errorMessage));
-      }
-    );
+    startScanning();
 
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+      if (html5QrCode.current?.isScanning) {
+        html5QrCode.current?.stop().catch(console.error);
       }
     };
   }, [onScan, onError]);
@@ -57,7 +57,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
   return (
     <div className="qr-scanner-container">
-      <div id="reader" className="w-full" />
+      <div id="reader" className="w-full min-h-[300px] rounded-lg overflow-hidden" />
       <input 
         ref={fileInputRef}
         type="file"
@@ -82,50 +82,35 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         </Button>
       </div>
       <style jsx global>{`
-        /* Hide unnecessary elements */
+        #reader {
+          border: none !important;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+
+        #reader video {
+          width: 100% !important;
+          height: 300px !important;
+          object-fit: cover !important;
+          border-radius: 8px !important;
+        }
+
+        #reader__scan_region {
+          background: transparent !important;
+        }
+
+        #reader__scan_region > img {
+          display: none !important;
+        }
+
+        /* Hide all HTML5QrcodeScanner elements */
         #reader__dashboard_section_csr,
         #reader__dashboard_section_swaplink,
         #reader__dashboard_section_fileselection,
         #reader__filescan_input,
         #reader__filescan_input_label,
-        #reader__camera_permission_button,
         #reader__camera_selection,
-        #reader__status_span {
-          display: none !important;
-        }
-
-        /* Basic styling */
-        #reader {
-          border: none !important;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          border-radius: 8px;
-          overflow: hidden;
-          width: 100% !important;
-          min-height: 300px !important;
-        }
-
-        /* Video container */
-        #reader__scan_region {
-          background: transparent !important;
-          border: none !important;
-          position: relative !important;
-          min-height: 300px !important;
-        }
-
-        #reader__scan_region video {
-          border-radius: 8px !important;
-          max-width: 100% !important;
-          object-fit: cover !important;
-        }
-
-        /* Dashboard */
-        #reader__dashboard {
-          padding: 0 !important;
-          border: none !important;
-        }
-
-        /* QR Region */
-        #reader__scan_region img {
+        #reader__status_span,
+        select {
           display: none !important;
         }
       `}</style>
