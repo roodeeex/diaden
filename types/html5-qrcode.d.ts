@@ -1,17 +1,39 @@
 declare module 'html5-qrcode' {
-  export class Html5QrcodeScanner {
+  interface Html5QrcodeScannerConfig {
+    fps?: number;
+    qrbox?: number | { width: number; height: number };
+    aspectRatio?: number;
+    disableFlip?: boolean;
+    videoConstraints?: {
+      facingMode?: string | { exact: string };
+    };
+  }
+
+  class Html5Qrcode {
+    constructor(elementId: string);
+    start(
+      cameraId: string | { facingMode: string | { exact: string } },
+      config: Html5QrcodeScannerConfig,
+      onScanSuccess: (decodedText: string, decodedResult: any) => void,
+      onScanError?: (errorMessage: string, error: Error) => void
+    ): Promise<void>;
+    stop(): Promise<void>;
+    clear(): Promise<void>;
+    isScanning: boolean;
+  }
+
+  class Html5QrcodeScanner {
     constructor(
       elementId: string,
-      config: {
-        qrbox?: { width: number; height: number } | number;
-        fps?: number;
-      },
-      verbose?: boolean
+      config: Html5QrcodeScannerConfig,
+      verbose: boolean
     );
     render(
-      successCallback: (decodedText: string, decodedResult?: any) => void,
-      errorCallback?: (errorMessage: string, error?: Error) => void
+      onScanSuccess: (decodedText: string, decodedResult: any) => void,
+      onScanError?: (errorMessage: string, error: Error) => void
     ): void;
     clear(): Promise<void>;
   }
+
+  export { Html5Qrcode, Html5QrcodeScanner };
 } 
