@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input"
 import { Camera, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
-// Create a wrapper component for the QR scanner
 const QRScanner = dynamic(
   () => import('@/components/QRScanner').then((mod) => mod.QRScanner),
   { ssr: false }
@@ -25,6 +24,9 @@ export default function BuyerPage() {
     if (navigator.vibrate) {
       navigator.vibrate(200);
     }
+    if (decodedText.toLowerCase() === 'nftcodetest123') {
+      router.push('/product/nike-air-jordan-1');
+    }
   };
 
   const handleError = (error: Error) => {
@@ -36,7 +38,11 @@ export default function BuyerPage() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    router.push(`/product/nike-air-jordan-1`)
+    if (nftCode.toLowerCase() === 'nftcodetest123') {
+      router.push('/product/nike-air-jordan-1')
+    } else {
+      alert('Product not found. Try using the test code: nftcodetest123')
+    }
   }
 
   const handleCameraClick = () => {
@@ -85,7 +91,7 @@ export default function BuyerPage() {
                   type="text"
                   value={nftCode}
                   onChange={(e) => setNftCode(e.target.value)}
-                  placeholder="Enter NFT code"
+                  placeholder="Try: nftcodetest123"
                   className="pr-12 relative"
                   required
                 />
@@ -106,17 +112,8 @@ export default function BuyerPage() {
           </form>
         )}
 
-        <div className="mt-4 text-center">
-          <a
-            href="/product/nike-air-jordan-1"
-            className="text-blue-500 hover:text-blue-700 transition-colors"
-            onClick={(e) => {
-              e.preventDefault();
-              router.push('/product/nike-air-jordan-1');
-            }}
-          >
-            Test: View Nike Air Jordan 1
-          </a>
+        <div className="mt-4 text-center text-sm text-gray-500">
+          For testing, use the code: nftcodetest123
         </div>
       </div>
     </div>
