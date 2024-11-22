@@ -16,6 +16,7 @@ const QRScanner = dynamic(
 export default function BuyerPage() {
   const [nftCode, setNftCode] = useState('')
   const [showScanner, setShowScanner] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleScan = (decodedText: string) => {
@@ -38,6 +39,10 @@ export default function BuyerPage() {
     router.push(`/product/nike-air-jordan-1`)
   }
 
+  const handleCameraClick = () => {
+    setShowScanner(true);
+  };
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-lg shadow-md w-96">
@@ -56,10 +61,17 @@ export default function BuyerPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <QRScanner 
-              onScan={handleScan} 
-              onError={handleError}
-            />
+            {isLoading ? (
+              <div className="flex items-center justify-center h-[250px]">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+              </div>
+            ) : (
+              <QRScanner 
+                onScan={handleScan} 
+                onError={handleError}
+                onInit={() => setIsLoading(false)}
+              />
+            )}
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
@@ -81,7 +93,7 @@ export default function BuyerPage() {
                   type="button"
                   size="icon"
                   className="absolute top-[70%] right-2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors bg-transparent hover:bg-transparent"
-                  onClick={() => setShowScanner(true)}
+                  onClick={handleCameraClick}
                 >
                   <Camera className="h-4 w-4" />
                   <span className="sr-only">Scan QR code</span>

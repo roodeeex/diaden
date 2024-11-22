@@ -6,14 +6,16 @@ import { Html5QrcodeScanner } from 'html5-qrcode'
 interface QRScannerProps {
   onScan: (decodedText: string) => void;
   onError: (error: Error) => void;
+  onInit?: () => void;
 }
 
-export function QRScanner({ onScan, onError }: QRScannerProps) {
+export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Configure scanner with back camera preference
     scannerRef.current = new Html5QrcodeScanner(
       "reader",
       {
@@ -22,58 +24,84 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           width: 250,
           height: 250,
         },
-        videoConstraints: {
-          facingMode: { exact: "environment" }
+        aspectRatio: 1.0,
+        showTorchButtonIfSupported: true,
+        defaultZoomValueIfSupported: 2,
+        formatsToSupport: [ 0x1 ], // QR Code only
+        rememberLastUsedCamera: true,
+        supportedScanTypes: [],  // Disable file scanning
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        },
+        cameraConfig: { 
+          facingMode: { exact: "environment" } // Force back camera
         }
       },
-      false
+      /* verbose= */ false
     );
 
+    // Start scanning automatically
     scannerRef.current.render(
       (decodedText) => {
         onScan(decodedText);
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
-        }
+        // Play success sound
+        const audio = new Audio('/beep.mp3');
+        audio.play().catch(() => {});
       },
       (errorMessage) => {
         onError(new Error(errorMessage));
       }
     );
 
+    // Notify parent component that scanner is initialized
+    if (onInit) {
+      onInit();
+    }
+
     return () => {
       if (scannerRef.current) {
         scannerRef.current.clear().catch(console.error);
       }
     };
-  }, [onScan, onError]);
+  }, [onScan, onError, onInit]);
 
   return (
     <div className="qr-scanner-container">
       <div id="reader" className="w-full" />
-      <style jsx global>{`
-        #reader__dashboard_section_csr,
-        #reader__dashboard_section_swaplink,
-        #reader__dashboard_section_fileselection,
-        #reader__camera_permission_button,
-        #reader__status_span {
-          display: none !important;
+      <style jsx>{`
+        .qr-scanner-container {
+          position: relative;
+          width: 100%;
+          max-width: 400px;
+          margin: 0 auto;
         }
-
-        #reader {
+        
+        :global(#reader) {
           border: none !important;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
           border-radius: 8px;
           overflow: hidden;
         }
 
-        #reader__scan_region {
+        :global(#reader__scan_region) {
           background: transparent !important;
-          border: none !important;
         }
 
-        #reader__scan_region video {
-          border-radius: 8px !important;
+        :global(#reader__dashboard) {
+          padding: 8px !important;
+          background: #f8f9fa !important;
+        }
+
+        :global(#reader__camera_selection) {
+          display: none !important;
+        }
+
+        :global(#reader__status_span) {
+          display: none !important;
+        }
+
+        :global(#reader__header_message) {
+          display: none !important;
         }
       `}</style>
     </div>

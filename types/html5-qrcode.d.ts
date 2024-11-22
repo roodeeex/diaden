@@ -3,17 +3,14 @@ declare module 'html5-qrcode' {
     constructor(
       elementId: string,
       config: {
-        fps?: number;
         qrbox?: { width: number; height: number } | number;
-        videoConstraints?: {
-          facingMode?: { exact: string } | string;
-        };
+        fps?: number;
       },
       verbose?: boolean
     );
     render(
-      successCallback: (decodedText: string) => void,
-      errorCallback: (errorMessage: string) => void
+      successCallback: (decodedText: string, decodedResult?: any) => void,
+      errorCallback?: (errorMessage: string, error?: Error) => void
     ): void;
     clear(): Promise<void>;
   }
