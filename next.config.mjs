@@ -4,7 +4,6 @@ const nextConfig = {
   images: {
     domains: [
       'cdn.dribbble.com',
-      // Add other domains you're using for images
     ],
   },
 };

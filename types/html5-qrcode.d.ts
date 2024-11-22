@@ -2,12 +2,6 @@ declare module 'html5-qrcode' {
   interface Html5QrcodeScannerConfig {
     fps?: number;
     qrbox?: number | { width: number; height: number };
-    formatsToSupport?: number[];
-    disableFlip?: boolean;
-    qrCodeSuccessCallback?: (decodedText: string, decodedResult: any) => void;
-    qrCodeErrorCallback?: (errorMessage: string, error: Error) => void;
-    verbose?: boolean;
-    cameraId?: string;
     facingMode?: string;
   }
 
