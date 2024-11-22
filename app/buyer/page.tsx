@@ -1,15 +1,15 @@
 "use client"
 
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Camera, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
-// Dynamically import Html5QrcodeScanner with no SSR
-const Html5QrcodeScanner = dynamic(
-  () => import('html5-qrcode').then(mod => mod.Html5QrcodeScanner),
+// Create a wrapper component for the QR scanner
+const QRScanner = dynamic(
+  () => import('@/components/QRScanner').then((mod) => mod.QRScanner),
   { ssr: false }
 );
 
@@ -18,29 +18,14 @@ export default function BuyerPage() {
   const [showScanner, setShowScanner] = useState(false)
   const router = useRouter()
 
-  useEffect(() => {
-    if (showScanner && typeof window !== 'undefined') {
-      const scanner = new Html5QrcodeScanner("reader", {
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        fps: 5,
-      }, false);
+  const handleScan = (decodedText: string) => {
+    setNftCode(decodedText);
+    setShowScanner(false);
+  };
 
-      scanner.render((decodedText) => {
-        setNftCode(decodedText);
-        setShowScanner(false);
-        scanner.clear();
-      }, (error) => {
-        console.warn(error);
-      });
-
-      return () => {
-        scanner.clear().catch(console.error);
-      };
-    }
-  }, [showScanner]);
+  const handleError = (error: Error) => {
+    console.warn(error);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
@@ -65,7 +50,7 @@ export default function BuyerPage() {
                 <X className="h-4 w-4" />
               </Button>
             </div>
-            <div id="reader" className="w-full"></div>
+            <QRScanner onScan={handleScan} onError={handleError} />
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
