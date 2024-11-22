@@ -17,18 +17,21 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    // Configure scanner with back camera preference
     const config = {
       fps: 10,
       qrbox: {
         width: 250,
         height: 250,
       },
-      aspectRatio: 1.0,
-      formatsToSupport: [ 0x1 ]
+      videoConstraints: {
+        facingMode: { exact: "environment" }
+      }
     };
 
-    scannerRef.current = new Html5QrcodeScanner("reader", config, false);
+    scannerRef.current = new Html5QrcodeScanner("reader", config, /* verbose= */ false);
 
+    // Start scanning
     scannerRef.current.render(
       (decodedText: string) => {
         onScan(decodedText);
@@ -40,15 +43,6 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         onError(new Error(errorMessage));
       }
     );
-
-    // Request camera permission immediately
-    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-      navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: { exact: "environment" } } 
-      }).catch(() => {
-        return navigator.mediaDevices.getUserMedia({ video: true });
-      });
-    }
 
     return () => {
       if (scannerRef.current) {
@@ -72,7 +66,6 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         onChange={(e) => {
           const file = e.target.files?.[0];
           if (file) {
-            // Handle file scanning here
             alert("Gallery scanning coming soon!");
           }
         }}
@@ -89,37 +82,51 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         </Button>
       </div>
       <style jsx global>{`
-        /* Hide all HTML5QrcodeScanner UI elements */
-        #reader__dashboard_section,
+        /* Hide unnecessary elements */
         #reader__dashboard_section_csr,
         #reader__dashboard_section_swaplink,
         #reader__dashboard_section_fileselection,
         #reader__filescan_input,
         #reader__filescan_input_label,
+        #reader__camera_permission_button,
         #reader__camera_selection,
         #reader__status_span {
           display: none !important;
         }
 
+        /* Basic styling */
         #reader {
           border: none !important;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
           border-radius: 8px;
           overflow: hidden;
+          width: 100% !important;
+          min-height: 300px !important;
         }
 
+        /* Video container */
         #reader__scan_region {
           background: transparent !important;
           border: none !important;
+          position: relative !important;
+          min-height: 300px !important;
         }
 
         #reader__scan_region video {
           border-radius: 8px !important;
+          max-width: 100% !important;
+          object-fit: cover !important;
         }
 
+        /* Dashboard */
         #reader__dashboard {
           padding: 0 !important;
           border: none !important;
+        }
+
+        /* QR Region */
+        #reader__scan_region img {
+          display: none !important;
         }
       `}</style>
     </div>
