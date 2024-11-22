@@ -15,37 +15,51 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
+    // Request camera permission first
+    navigator.mediaDevices.getUserMedia({ video: true })
+      .then(() => {
+        if (typeof window === 'undefined' || scannerRef.current) return;
 
-    const config = {
-      fps: 10,
-      qrbox: {
-        width: 250,
-        height: 250,
-      },
-      aspectRatio: 1.0,
-      videoConstraints: {
-        facingMode: { exact: "environment" }
-      }
-    };
+        // Initialize scanner after permission is granted
+        scannerRef.current = new Html5QrcodeScanner(
+          "reader",
+          {
+            fps: 10,
+            qrbox: {
+              width: 250,
+              height: 250,
+            },
+            videoConstraints: {
+              facingMode: { exact: "environment" }
+            }
+          },
+          false
+        );
 
-    scannerRef.current = new Html5QrcodeScanner("reader", config, false);
+        scannerRef.current.render(
+          (decodedText) => {
+            onScan(decodedText);
+            if (navigator.vibrate) {
+              navigator.vibrate(200);
+            }
+          },
+          (errorMessage) => {
+            console.error(errorMessage);
+            onError(new Error(errorMessage));
+          }
+        );
+      })
+      .catch((error) => {
+        console.error("Camera permission error:", error);
+        onError(new Error("Camera permission denied"));
+      });
 
-    scannerRef.current.render(
-      (decodedText: string) => {
-        onScan(decodedText);
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
-        }
-      },
-      (errorMessage: string, error: Error) => {
-        onError(error);
-      }
-    );
-
+    // Cleanup function
     return () => {
       if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+        scannerRef.current.clear()
+          .catch(error => console.error("Failed to clear scanner:", error));
+        scannerRef.current = null;
       }
     };
   }, [onScan, onError]);
@@ -56,7 +70,7 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
 
   return (
     <div className="qr-scanner-container">
-      <div id="reader" className="w-full" />
+      <div id="reader" className="w-full min-h-[300px]" />
       <input 
         ref={fileInputRef}
         type="file"
@@ -81,45 +95,41 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         </Button>
       </div>
       <style jsx global>{`
+        #reader {
+          border: none !important;
+          box-shadow: 0 0 10px rgba(0,0,0,0.1);
+          border-radius: 8px;
+          overflow: hidden;
+        }
+
+        #reader__scan_region {
+          background: transparent !important;
+          border: none !important;
+          min-height: 300px !important;
+        }
+
+        #reader__scan_region video {
+          max-width: 100% !important;
+          min-height: 300px !important;
+          object-fit: cover !important;
+          border-radius: 8px !important;
+        }
+
+        /* Hide unnecessary elements */
         #reader__dashboard_section_csr,
         #reader__dashboard_section_swaplink,
         #reader__dashboard_section_fileselection,
         #reader__filescan_input,
         #reader__filescan_input_label,
         #reader__camera_selection,
-        #reader__status_span {
+        #reader__status_span,
+        #reader__header_message {
           display: none !important;
-        }
-
-        #reader {
-          border: none !important;
-          box-shadow: 0 0 10px rgba(0,0,0,0.1);
-          border-radius: 8px;
-          overflow: hidden;
-          width: 100% !important;
-          min-height: 300px !important;
-        }
-
-        #reader__scan_region {
-          background: transparent !important;
-          border: none !important;
-          position: relative !important;
-          min-height: 300px !important;
-        }
-
-        #reader__scan_region video {
-          border-radius: 8px !important;
-          max-width: 100% !important;
-          object-fit: cover !important;
         }
 
         #reader__dashboard {
           padding: 0 !important;
           border: none !important;
-        }
-
-        #reader__scan_region img {
-          display: none !important;
         }
       `}</style>
     </div>
