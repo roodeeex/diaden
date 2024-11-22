@@ -29,10 +29,7 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
           qrbox: {
             width: 250,
             height: 250,
-          },
-          rememberLastUsedCamera: false, // Disable camera selection memory
-          showTorchButtonIfSupported: true, // Show flash button if available
-          defaultZoomValueIfSupported: 2,
+          }
         },
         false
       );
