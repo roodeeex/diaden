@@ -15,37 +15,76 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Configure scanner with back camera preference
-    scannerRef.current = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
+    // Request camera permission immediately when component mounts
+    navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: { exact: "environment" } 
+      } 
+    }).then(() => {
+      // After permission is granted, initialize the scanner
+      scannerRef.current = new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: {
+            width: 250,
+            height: 250,
+          },
+          facingMode: "environment",
         },
-        facingMode: "environment",
-      },
-      false
-    );
+        false
+      );
 
-    // Start scanning automatically
-    scannerRef.current.render(
-      (decodedText) => {
-        onScan(decodedText);
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
+      scannerRef.current.render(
+        (decodedText) => {
+          onScan(decodedText);
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
+        },
+        (errorMessage) => {
+          onError(new Error(errorMessage));
         }
-      },
-      (errorMessage) => {
-        onError(new Error(errorMessage));
-      }
-    );
+      );
 
-    // Notify parent component that scanner is initialized
-    if (onInit) {
-      onInit();
-    }
+      if (onInit) {
+        onInit();
+      }
+    }).catch((err) => {
+      console.warn("Failed to get back camera, falling back to any camera:", err);
+      // Fallback to any available camera
+      return navigator.mediaDevices.getUserMedia({ video: true })
+        .then(() => {
+          // Initialize scanner with any available camera
+          scannerRef.current = new Html5QrcodeScanner(
+            "reader",
+            {
+              fps: 10,
+              qrbox: {
+                width: 250,
+                height: 250,
+              },
+            },
+            false
+          );
+
+          scannerRef.current.render(
+            (decodedText) => {
+              onScan(decodedText);
+              if (navigator.vibrate) {
+                navigator.vibrate(200);
+              }
+            },
+            (errorMessage) => {
+              onError(new Error(errorMessage));
+            }
+          );
+
+          if (onInit) {
+            onInit();
+          }
+        });
+    });
 
     return () => {
       if (scannerRef.current) {
