@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef } from 'react'
-import { Html5QrcodeScanner } from 'html5-qrcode'
+import { Html5QrcodeScanner, Html5Qrcode } from 'html5-qrcode'
 import { ImageIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
@@ -12,16 +12,23 @@ interface QRScannerProps {
 
 export function QRScanner({ onScan, onError }: QRScannerProps) {
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
+  const html5QrcodeRef = useRef<Html5Qrcode | null>(null);
 
-  const handleFileUpload = () => {
+  const handleFileUpload = async () => {
     const input = document.createElement('input');
     input.type = 'file';
     input.accept = 'image/*';
     input.onchange = async (e) => {
       const file = (e.target as HTMLInputElement).files?.[0];
-      if (file && scannerRef.current) {
+      if (file) {
         try {
-          const result = await scannerRef.current.html5Qrcode.scanFile(file, true);
+          // Initialize HTML5Qrcode if not already initialized
+          if (!html5QrcodeRef.current) {
+            html5QrcodeRef.current = new Html5Qrcode("reader");
+          }
+          
+          const imageFile = file;
+          const result = await html5QrcodeRef.current.scanFile(imageFile, true);
           onScan(result);
         } catch (error) {
           onError(error as Error);
@@ -42,7 +49,6 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           width: 250,
           height: 250,
         },
-        aspectRatio: 1.0,
         showTorchButtonIfSupported: true,
         videoConstraints: {
           facingMode: { exact: "environment" }
@@ -66,6 +72,9 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
     return () => {
       if (scannerRef.current) {
         scannerRef.current.clear().catch(console.error);
+      }
+      if (html5QrcodeRef.current) {
+        html5QrcodeRef.current.clear().catch(console.error);
       }
     };
   }, [onScan, onError]);
