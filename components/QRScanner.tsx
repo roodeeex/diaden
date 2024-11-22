@@ -15,37 +15,48 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Configure scanner with back camera preference
-    scannerRef.current = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        facingMode: "environment",
-      },
-      false
-    );
-
-    // Start scanning automatically
-    scannerRef.current.render(
-      (decodedText) => {
-        onScan(decodedText);
-        if (navigator.vibrate) {
-          navigator.vibrate(200);
-        }
-      },
-      (errorMessage) => {
-        onError(new Error(errorMessage));
+    // Request camera permission immediately
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { exact: "environment" } // Force back camera
       }
-    );
+    }).then(() => {
+      // Initialize scanner after permission is granted
+      scannerRef.current = new Html5QrcodeScanner(
+        "reader",
+        {
+          fps: 10,
+          qrbox: {
+            width: 250,
+            height: 250,
+          },
+          rememberLastUsedCamera: false, // Disable camera selection memory
+          showTorchButtonIfSupported: true, // Show flash button if available
+          defaultZoomValueIfSupported: 2,
+        },
+        false
+      );
 
-    // Notify parent component that scanner is initialized
-    if (onInit) {
-      onInit();
-    }
+      // Start scanning automatically
+      scannerRef.current.render(
+        (decodedText) => {
+          onScan(decodedText);
+          if (navigator.vibrate) {
+            navigator.vibrate(200);
+          }
+        },
+        (errorMessage) => {
+          onError(new Error(errorMessage));
+        }
+      );
+
+      if (onInit) {
+        onInit();
+      }
+    }).catch((error) => {
+      console.error("Failed to get camera permission:", error);
+      onError(new Error("Camera permission denied"));
+    });
 
     return () => {
       if (scannerRef.current) {
@@ -90,6 +101,14 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
         }
 
         :global(#reader__header_message) {
+          display: none !important;
+        }
+
+        :global(#reader__dashboard_section_swaplink) {
+          display: none !important;
+        }
+
+        :global(#reader__dashboard_section_csr) {
           display: none !important;
         }
       `}</style>
