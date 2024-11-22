@@ -17,33 +17,38 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    scannerRef.current = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        showTorchButtonIfSupported: true,
-        videoConstraints: {
-          facingMode: { exact: "environment" }
-        }
+    const config = {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250,
       },
-      false
-    );
+      aspectRatio: 1.0,
+      formatsToSupport: [ 0x1 ]
+    };
+
+    scannerRef.current = new Html5QrcodeScanner("reader", config, false);
 
     scannerRef.current.render(
-      (decodedText) => {
+      (decodedText: string) => {
         onScan(decodedText);
         if (navigator.vibrate) {
           navigator.vibrate(200);
         }
       },
-      (errorMessage) => {
+      (errorMessage: string) => {
         onError(new Error(errorMessage));
       }
     );
+
+    // Request camera permission immediately
+    if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: { exact: "environment" } } 
+      }).catch(() => {
+        return navigator.mediaDevices.getUserMedia({ video: true });
+      });
+    }
 
     return () => {
       if (scannerRef.current) {
@@ -66,15 +71,9 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         className="hidden"
         onChange={(e) => {
           const file = e.target.files?.[0];
-          if (file && scannerRef.current) {
-            scannerRef.current.clear();
-            Html5QrcodeScanner.prototype.scanFile(file, true)
-              .then(decodedText => {
-                onScan(decodedText);
-              })
-              .catch(error => {
-                onError(error);
-              });
+          if (file) {
+            // Handle file scanning here
+            alert("Gallery scanning coming soon!");
           }
         }}
       />
@@ -90,14 +89,18 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
         </Button>
       </div>
       <style jsx global>{`
-        /* Hide unnecessary UI elements */
+        /* Hide all HTML5QrcodeScanner UI elements */
+        #reader__dashboard_section,
         #reader__dashboard_section_csr,
         #reader__dashboard_section_swaplink,
-        #reader__dashboard_section_fileselection {
+        #reader__dashboard_section_fileselection,
+        #reader__filescan_input,
+        #reader__filescan_input_label,
+        #reader__camera_selection,
+        #reader__status_span {
           display: none !important;
         }
 
-        /* Custom styling for the scanner */
         #reader {
           border: none !important;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -110,36 +113,13 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           border: none !important;
         }
 
-        #reader__scan_region > img {
-          display: none !important;
-        }
-
-        #reader__camera_selection {
-          display: none !important;
-        }
-
-        #reader__status_span {
-          display: none !important;
+        #reader__scan_region video {
+          border-radius: 8px !important;
         }
 
         #reader__dashboard {
           padding: 0 !important;
           border: none !important;
-        }
-
-        /* Customize the scanning region */
-        #reader__scan_region video {
-          border-radius: 8px !important;
-        }
-
-        /* Style the torch button if available */
-        #reader__dashboard_section_torch button {
-          background: #3b82f6 !important;
-          color: white !important;
-          border: none !important;
-          padding: 8px 16px !important;
-          border-radius: 6px !important;
-          margin: 8px !important;
         }
       `}</style>
     </div>
