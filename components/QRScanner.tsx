@@ -14,25 +14,20 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    scannerRef.current = new Html5QrcodeScanner(
-      "reader",
-      {
-        fps: 10,
-        qrbox: {
-          width: 250,
-          height: 250,
-        },
-        showTorchButtonIfSupported: true,
-        hideSelectScanType: true,
-        rememberLastUsedCamera: true,
-        videoConstraints: {
-          facingMode: { exact: "environment" }
-        }
+    // Configure scanner with back camera preference
+    const config = {
+      fps: 10,
+      qrbox: {
+        width: 250,
+        height: 250,
       },
-      false
-    );
+      aspectRatio: 1.0
+    };
 
-    scannerRef.current.render(
+    scannerRef.current = new Html5QrcodeScanner("reader", config, false);
+
+    const html5QrcodeScanner = scannerRef.current;
+    html5QrcodeScanner.render(
       (decodedText) => {
         onScan(decodedText);
         if (navigator.vibrate) {
@@ -44,9 +39,21 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
       }
     );
 
+    // Request camera permission immediately
+    navigator.mediaDevices.getUserMedia({ 
+      video: { 
+        facingMode: { 
+          exact: "environment" 
+        } 
+      } 
+    }).catch(() => {
+      // Fallback to any available camera
+      return navigator.mediaDevices.getUserMedia({ video: true });
+    });
+
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(console.error);
+      if (html5QrcodeScanner) {
+        html5QrcodeScanner.clear().catch(console.error);
       }
     };
   }, [onScan, onError]);
@@ -55,20 +62,14 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
     <div className="qr-scanner-container">
       <div id="reader" className="w-full" />
       <style jsx global>{`
-        /* Hide unnecessary UI elements */
-        #reader__dashboard_section_csr {
-          display: none !important;
-        }
-        
-        #reader__dashboard_section_swaplink {
-          display: none !important;
-        }
-        
-        #reader__dashboard_section_fileselection {
+        #reader__dashboard_section_csr,
+        #reader__dashboard_section_swaplink,
+        #reader__dashboard_section_fileselection,
+        #reader__camera_selection,
+        #reader__status_span {
           display: none !important;
         }
 
-        /* Custom styling for the scanner */
         #reader {
           border: none !important;
           box-shadow: 0 0 10px rgba(0,0,0,0.1);
@@ -81,36 +82,8 @@ export function QRScanner({ onScan, onError }: QRScannerProps) {
           border: none !important;
         }
 
-        #reader__scan_region > img {
-          display: none !important;
-        }
-
-        #reader__camera_selection {
-          display: none !important;
-        }
-
-        #reader__status_span {
-          display: none !important;
-        }
-
-        #reader__dashboard {
-          padding: 0 !important;
-          border: none !important;
-        }
-
-        /* Customize the scanning region */
         #reader__scan_region video {
           border-radius: 8px !important;
-        }
-
-        /* Style the torch button if available */
-        #reader__dashboard_section_torch button {
-          background: #3b82f6 !important;
-          color: white !important;
-          border: none !important;
-          padding: 8px 16px !important;
-          border-radius: 6px !important;
-          margin: 8px !important;
         }
       `}</style>
     </div>

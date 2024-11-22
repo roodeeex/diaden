@@ -16,7 +16,6 @@ const QRScanner = dynamic(
 export default function BuyerPage() {
   const [nftCode, setNftCode] = useState('')
   const [showScanner, setShowScanner] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
 
   const handleScan = (decodedText: string) => {
@@ -38,10 +37,6 @@ export default function BuyerPage() {
     e.preventDefault()
     router.push(`/product/nike-air-jordan-1`)
   }
-
-  const handleCameraClick = () => {
-    setShowScanner(true);
-  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -86,7 +81,7 @@ export default function BuyerPage() {
                   type="button"
                   size="icon"
                   className="absolute top-[70%] right-2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors bg-transparent hover:bg-transparent"
-                  onClick={handleCameraClick}
+                  onClick={() => setShowScanner(true)}
                 >
                   <Camera className="h-4 w-4" />
                   <span className="sr-only">Scan QR code</span>
