@@ -8,7 +8,7 @@ import { Camera, X } from 'lucide-react'
 import dynamic from 'next/dynamic'
 
 const QRScanner = dynamic(
-  () => import('@/components/QRScanner').then((mod) => mod.QRScanner),
+  () => import('@/components/QRScanner'),
   { ssr: false }
 );
 
@@ -19,13 +19,43 @@ export default function BuyerPage() {
   const router = useRouter()
 
   const handleScan = (decodedText: string) => {
-    setNftCode(decodedText);
+    try {
+      // Check if the decoded text is a URL
+      const url = new URL(decodedText);
+      
+      // Handle different URL formats
+      if (url.pathname.includes('/product/')) {
+        // Extract everything after /product/
+        const params = url.pathname.split('/product/')[1];
+        
+        // Check if it contains a post parameter
+        if (params.includes('post=')) {
+          const nftCode = params.split('post=')[1];
+          // Use the NFT code to redirect
+          if (nftCode.toLowerCase() === 'nftcodetest123') {
+            router.push('/product/nike-air-jordan-1');
+          } else {
+            alert('Invalid product code');
+          }
+        } else {
+          // Direct product URL
+          router.push(url.pathname);
+        }
+      } else {
+        throw new Error('Invalid product URL');
+      }
+    } catch {
+      // If not a URL, treat it as a product code
+      if (decodedText.toLowerCase() === 'nftcodetest123') {
+        router.push('/product/nike-air-jordan-1');
+      } else {
+        alert('Invalid QR code or product code');
+      }
+    }
+    
     setShowScanner(false);
     if (navigator.vibrate) {
       navigator.vibrate(200);
-    }
-    if (decodedText.toLowerCase() === 'nftcodetest123') {
-      router.push('/product/nike-air-jordan-1');
     }
   };
 
@@ -37,16 +67,12 @@ export default function BuyerPage() {
   };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     if (nftCode.toLowerCase() === 'nftcodetest123') {
-      router.push('/product/nike-air-jordan-1')
+      router.push('/product/nike-air-jordan-1');
     } else {
-      alert('Product not found. Try using the test code: nftcodetest123')
+      alert('Product not found. Try using the test code: nftcodetest123');
     }
-  }
-
-  const handleCameraClick = () => {
-    setShowScanner(true);
   };
 
   return (
@@ -99,7 +125,7 @@ export default function BuyerPage() {
                   type="button"
                   size="icon"
                   className="absolute top-[70%] right-2 -translate-y-1/2 text-gray-400 hover:text-blue-500 transition-colors bg-transparent hover:bg-transparent"
-                  onClick={handleCameraClick}
+                  onClick={() => setShowScanner(true)}
                 >
                   <Camera className="h-4 w-4" />
                   <span className="sr-only">Scan QR code</span>

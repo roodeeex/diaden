@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import Image from 'next/image'
+
 import { Button } from "@/components/ui/button"
+import logo from './logo.png'
 
 export default function OnboardingPage() {
   return (
@@ -8,11 +10,13 @@ export default function OnboardingPage() {
       <div className="mb-8 bg-white p-4 rounded-lg shadow-md">
         <div className="mb-8">
           <Image
-            src="/img/logo.png"
+            src={logo}
             alt="DIADEN Logo"
             width={200}
             height={100}
+            priority
             className="rounded-lg"
+            // class="rounded-lg"
           />
         </div>
       </div>

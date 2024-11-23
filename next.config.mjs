@@ -1,9 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {
-  transpilePackages: ['html5-qrcode'],
-  images: {
-    domains: ['cdn.dribbble.com'],
-  },
-};
+const nextConfig = {};
 
 export default nextConfig;

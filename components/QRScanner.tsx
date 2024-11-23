@@ -3,7 +3,7 @@
 import { useEffect, useRef } from 'react'
 import { Html5QrcodeScanner } from 'html5-qrcode'
 
-interface QRScannerProps {
+type QRScannerProps = {
   onScan: (decodedText: string) => void;
   onError: (error: Error) => void;
   onInit?: () => void;
@@ -15,7 +15,6 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // Configure scanner with back camera preference
     scannerRef.current = new Html5QrcodeScanner(
       "reader",
       {
@@ -29,7 +28,6 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
       false
     );
 
-    // Start scanning automatically
     scannerRef.current.render(
       (decodedText) => {
         onScan(decodedText);
@@ -42,7 +40,6 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
       }
     );
 
-    // Notify parent component that scanner is initialized
     if (onInit) {
       onInit();
     }
@@ -95,4 +92,6 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
       `}</style>
     </div>
   );
-} 
+}
+
+export default QRScanner; 
