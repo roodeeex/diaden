@@ -23,7 +23,8 @@ export function QRScanner({ onScan, onError, onInit }: QRScannerProps) {
           width: 250,
           height: 250,
         },
-        facingMode: "environment",
+        rememberLastUsedCamera: true,
+        supportedScanTypes: []
       },
       false
     );
