@@ -31,7 +31,7 @@ export default function BuyerPage() {
           // Handle post=nftcode format
           const nftCode = pathPart.replace('post=', '');
           if (nftCode.toLowerCase() === 'nftcodetest123') {
-            router.push('/product/nike-air-jordan-1');
+            router.push('/product/mike-wind-1');
           } else {
             alert('Invalid product code');
           }
@@ -45,7 +45,7 @@ export default function BuyerPage() {
     } catch {
       // If not a URL, treat it as a direct code
       if (decodedText.toLowerCase() === 'nftcodetest123') {
-        router.push('/product/nike-air-jordan-1');
+        router.push('/product/mike-wind-1');
       } else {
         alert('Invalid QR code or product code');
       }
@@ -67,7 +67,7 @@ export default function BuyerPage() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (nftCode.toLowerCase() === 'nftcodetest123') {
-      router.push('/product/nike-air-jordan-1');
+      router.push('/product/mike-wind-1');
     } else {
       alert('Product not found. Try using the test code: nftcodetest123');
     }
