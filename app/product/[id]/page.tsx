@@ -4,12 +4,12 @@ import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle, Image as ImageIcon } from 'lucide-react'
+import { CheckCircle, Image as ImageIcon, ExternalLink } from 'lucide-react'
 import p1 from './p1.png'
 import physical from './physical.png'
 
 const productData = {
-  id: 'mike-air-jordan-1',
+  id: 'mike-wind-1',
   name: 'Mike Wind 1',
   seller: 'Mike',
   productionDate: '2023-03-01',
@@ -21,6 +21,10 @@ const productData = {
 
 export default function ProductPage() {
   const [showPhysical, setShowPhysical] = useState(false)
+
+  const handleXRPLedgerClick = () => {
+    window.open('https://testnet.xrpl.org/nft/00080000AB9CC6DA21003E7F43F31A3F242FF1C0CCE0E2D0BF445B6F00263DD4', '_blank');
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
@@ -68,7 +72,11 @@ export default function ProductPage() {
                 <p className="mt-2 text-gray-600">{productData.description}</p>
               </div>
               <div className="mt-6">
-                <Button className="bg-indigo-600 hover:bg-indigo-700 text-white">
+                <Button 
+                  onClick={handleXRPLedgerClick}
+                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
                   View on XRP Ledger
                 </Button>
               </div>
