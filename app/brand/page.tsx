@@ -2,7 +2,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-
+import physical from './physical.png'
 export default function BrandLandingPage() {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -22,7 +22,7 @@ export default function BrandLandingPage() {
           </div>
           <div className="lg:w-1/2">
             <Image
-              src="https://cdn.dribbble.com/users/7087400/screenshots/17815910/media/1bd10fbe33ad42ba52eaf891335e3415.png"
+              src={physical}
               alt="Brand Authentication Concept"
               width={600}
               height={400}
