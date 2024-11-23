@@ -14,7 +14,7 @@ const productData = {
   description: 'The Air Jordan 1, first released in 1985, is an iconic sneaker designed for Michael Jordan. This classic model features premium leather uppers, the Nike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
 }
 
-export default function ProductPage({ params }: { params: { id: string } }) {
+export default function ProductPage() {
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
