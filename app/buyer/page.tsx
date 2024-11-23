@@ -23,29 +23,27 @@ export default function BuyerPage() {
       // Check if the decoded text is a URL
       const url = new URL(decodedText);
       
-      // Handle different URL formats
-      if (url.pathname.includes('/product/')) {
-        // Extract everything after /product/
-        const params = url.pathname.split('/product/')[1];
-        
-        // Check if it contains a post parameter
-        if (params.includes('post=')) {
-          const nftCode = params.split('post=')[1];
-          // Use the NFT code to redirect
+      // Extract the path part after /product/
+      const pathPart = url.pathname.split('/product/')[1];
+      
+      if (pathPart) {
+        if (pathPart.startsWith('post=')) {
+          // Handle post=nftcode format
+          const nftCode = pathPart.replace('post=', '');
           if (nftCode.toLowerCase() === 'nftcodetest123') {
             router.push('/product/nike-air-jordan-1');
           } else {
             alert('Invalid product code');
           }
         } else {
-          // Direct product URL
-          router.push(url.pathname);
+          // Direct product path
+          router.push(`/product/${pathPart}`);
         }
       } else {
         throw new Error('Invalid product URL');
       }
     } catch {
-      // If not a URL, treat it as a product code
+      // If not a URL, treat it as a direct code
       if (decodedText.toLowerCase() === 'nftcodetest123') {
         router.push('/product/nike-air-jordan-1');
       } else {
