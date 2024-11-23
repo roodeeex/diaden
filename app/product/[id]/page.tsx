@@ -16,7 +16,7 @@ const productData = {
   nftId: 'NFT-AJ1-123456',
   nftImage: p1,
   physicalImage: physical,
-  description: 'The Mike Wind 1, first released in 1985. This classic model features premium leather uppers, the Mike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
+  description: 'The Mike Wind 1, first released in 1985. This classic model features premium leather uppers, the Mike Woosh, and cushioning in the sole to make you as fast as Wind. Its timeless design has made it a cultural phenomenon beyond skating.'
 }
 
 export default function ProductPage() {
