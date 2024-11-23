@@ -1,20 +1,27 @@
+"use client"
+
+import { useState } from 'react'
 import Image from 'next/image'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CheckCircle } from 'lucide-react'
+import { CheckCircle, Image as ImageIcon } from 'lucide-react'
 import p1 from './p1.png'
+import physical from './physical.png'
 
 const productData = {
-  id: 'nike-air-jordan-1',
-  name: 'Nike Air Jordan 1',
-  seller: 'Nike',
+  id: 'mike-air-jordan-1',
+  name: 'Mike Wind 1',
+  seller: 'Mike',
   productionDate: '2023-03-01',
   nftId: 'NFT-AJ1-123456',
-  imageUrl: p1,
-  description: 'The Air Jordan 1, first released in 1985, is an iconic sneaker designed for Michael Jordan. This classic model features premium leather uppers, the Nike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
+  nftImage: p1,
+  physicalImage: physical,
+  description: 'The Mike Wind 1, first released in 1985. This classic model features premium leather uppers, the Mike Swoosh, and Air cushioning in the sole. Its timeless design has made it a cultural phenomenon beyond basketball.'
 }
 
 export default function ProductPage() {
+  const [showPhysical, setShowPhysical] = useState(false)
+
   return (
     <div className="min-h-screen bg-gray-100 py-12 px-4 sm:px-6 lg:px-8">
       <Card className="max-w-4xl mx-auto bg-white rounded-lg shadow-md overflow-hidden">
@@ -22,13 +29,21 @@ export default function ProductPage() {
           <div className="lg:w-1/2 relative">
             <div className="aspect-square relative">
               <Image
-                src={productData.imageUrl}
+                src={showPhysical ? productData.physicalImage : productData.nftImage}
                 alt={productData.name}
                 fill
                 className="object-contain"
                 priority
               />
             </div>
+            <Button
+              onClick={() => setShowPhysical(!showPhysical)}
+              className="absolute bottom-4 right-4 bg-white/80 hover:bg-white text-gray-800"
+              size="sm"
+            >
+              <ImageIcon className="mr-2 h-4 w-4" />
+              {showPhysical ? 'View NFT' : 'View Physical'}
+            </Button>
           </div>
           <div className="p-8 lg:w-1/2">
             <CardHeader className="p-0">
@@ -42,7 +57,7 @@ export default function ProductPage() {
             <div className="mt-2 mb-4">
               <div className="inline-flex items-center px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">
                 <CheckCircle className="w-3 h-3 mr-1" />
-                Verified by Daiden and Nike
+                Verified by Daiden and Mike
               </div>
             </div>
             <CardContent className="p-0">
